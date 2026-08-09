@@ -10,7 +10,8 @@
     "gallery:fetch": "tsx scripts/fetch-gallery.ts",
     "gallery:build": "tsx scripts/build-index.mts",
     "gallery:verify": "tsx scripts/verify-index.mts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gallery:audit": "tsx scripts/audit-index.mts"
   },
   "dependencies": {
     "@number-flow/react": "^0.6.2",
