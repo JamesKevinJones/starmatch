@@ -183,7 +183,13 @@ async function enrichEntities(ids: string[]) {
       action: 'wbgetentities',
       ids: batch.join('|'),
       props: 'labels|descriptions|sitelinks/urls',
-      languages: 'en',
+      // `mul` is not optional. Wikidata is migrating personal names - which are
+      // identical across languages - into a single multilingual `mul` label and
+      // deleting the per-language `en` one. Meryl Streep (Q873) and Taylor
+      // Swift (Q26876) already have no `en` label at all. Asking for `en` alone
+      // is what made `SERVICE wikibase:label` return a bare "Q873" as a name,
+      // and later made those people vanish from the gallery entirely.
+      languages: 'en|mul|en-gb',
       sitefilter: 'enwiki',
       format: 'json',
     });
@@ -197,17 +203,19 @@ async function enrichEntities(ids: string[]) {
       });
       const json = (await res.json()) as {
         entities?: Record<string, {
-          labels?: { en?: { value: string } };
-          descriptions?: { en?: { value: string } };
+          labels?: Record<string, { value: string } | undefined>;
+          descriptions?: Record<string, { value: string } | undefined>;
           sitelinks?: { enwiki?: { url?: string } };
         }>;
       };
       for (const [qid, ent] of Object.entries(json.entities ?? {})) {
-        const label = ent.labels?.en?.value;
+        // Prefer an explicit English label, then the multilingual one.
+        const label =
+          ent.labels?.en?.value ?? ent.labels?.mul?.value ?? ent.labels?.['en-gb']?.value;
         if (!label) continue;
         out.set(qid, {
           label,
-          description: ent.descriptions?.en?.value ?? '',
+          description: ent.descriptions?.en?.value ?? ent.descriptions?.mul?.value ?? '',
           wikipediaUrl: ent.sitelinks?.enwiki?.url ?? '',
         });
       }
