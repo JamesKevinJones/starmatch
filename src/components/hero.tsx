@@ -26,7 +26,13 @@ export function Hero({ galleryCount }: { galleryCount: number }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden border-b-[3px]">
-      <div className="absolute inset-0 -z-10" aria-hidden>
+      {/*
+        The dither pattern is high-contrast enough to swallow body text at full
+        strength. It is held at 40% and covered by a scrim that fades from the
+        page background, so the left column stays readable while the texture
+        still reads on the right.
+      */}
+      <div className="absolute inset-0 -z-10 opacity-40" aria-hidden>
         {shaderOn && (
           <Dithering
             style={{ width: '100%', height: '100%' }}
@@ -39,6 +45,10 @@ export function Hero({ galleryCount }: { galleryCount: number }) {
           />
         )}
       </div>
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-[var(--bg)] via-[var(--bg)]/80 to-transparent"
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
         <motion.div
