@@ -45,7 +45,16 @@ export default async function EthicsPage() {
           national database and false matches stop being a curiosity and start being someone&rsquo;s
           afternoon in a police station.
         </p>
+        <p>
+          For scale: two photographs of Keanu Reeves taken five years apart measure{' '}
+          <strong>0.371</strong> apart in this same descriptor space — you can reproduce that on
+          the <a href="/compare" className="underline underline-offset-4">doppelgänger page</a>.
+          The closest pair of <em>different</em> people in the gallery is{' '}
+          <strong>{cal.min.toFixed(3)}</strong>. Those numbers are effectively the same. Two
+          strangers can sit as close together as two photos of one person.
+        </p>
         <Stat rows={[
+          ['Same person, 5 years apart', '0.371'],
           ['Closest stranger pair', cal.min.toFixed(3)],
           ['5th percentile', cal.p05.toFixed(3)],
           ['Median stranger pair', cal.p50.toFixed(3)],

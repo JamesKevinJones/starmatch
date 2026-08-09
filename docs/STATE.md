@@ -29,6 +29,25 @@ needs no code change.
 - Theme applies pre-paint via an inline script, so there is no flash of the
   wrong theme and no hydration mismatch
 
+## Doppelgänger mode (`/compare`)
+
+Compares two user-supplied photos against each other. Deliberately does not
+touch the gallery index, so two private individuals can be compared without
+either being enrolled, searched for, or stored.
+
+Verified: two photos of Keanu Reeves five years apart measure 0.371. The closest
+pair of different people in the gallery is 0.377. Those are effectively the same
+number, which is the clearest demonstration of the threshold problem in the
+whole project — it is now cited on the ethics page.
+
+## Deliberately not built
+
+A "match against every named face online" index. Technically the false-match
+rate scales with gallery size (the 0.377 finding above is from only 366 faces);
+legally that product is Clearview AI, fined under GDPR in France, Italy, Greece
+and the Netherlands and ruled unlawful in the UK and Australia. The gallery
+stays limited to public figures with freely-licensed portraits.
+
 ## Outstanding — needs the user
 
 **Deleting the old fork.** `JamesKevinJones/face_recognition` is still live. The

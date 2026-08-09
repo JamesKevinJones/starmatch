@@ -202,6 +202,54 @@ export async function matchFace(
   };
 }
 
+export type FaceEmbedding = {
+  descriptor: Float32Array;
+  faceChip: string;
+  confidence: number;
+  facesFound: number;
+};
+
+/**
+ * Embed a single face without ranking it against the gallery.
+ *
+ * Used by the doppelgänger comparison, which measures two user-supplied photos
+ * against each other. Nothing here touches the gallery index, so comparing two
+ * private individuals never enrols either of them anywhere.
+ */
+export async function embedFace(
+  image: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement,
+): Promise<FaceEmbedding> {
+  const faceapi = await loadEngine();
+
+  const detections = await faceapi
+    .detectAllFaces(image, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 }))
+    .withFaceLandmarks()
+    .withFaceDescriptors();
+
+  if (!detections.length) throw new NoFaceError();
+
+  const chosen = detections.reduce((a, b) =>
+    a.detection.box.area >= b.detection.box.area ? a : b,
+  );
+
+  return {
+    descriptor: Float32Array.from(chosen.descriptor),
+    faceChip: cropFace(image, chosen.detection.box),
+    confidence: chosen.detection.score,
+    facesFound: detections.length,
+  };
+}
+
+/** Euclidean distance between two descriptors. Lower is more similar. */
+export function descriptorDistance(a: Float32Array, b: Float32Array): number {
+  let sum = 0;
+  for (let i = 0; i < a.length; i++) {
+    const d = a[i] - b[i];
+    sum += d * d;
+  }
+  return Math.sqrt(sum);
+}
+
 /** Square, padded crop of the detected face as a data URL. */
 function cropFace(
   source: CanvasImageSource,

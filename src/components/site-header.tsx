@@ -6,6 +6,7 @@ import { Moon, Sun } from 'lucide-react';
 
 const NAV = [
   { href: '/match', label: 'Match' },
+  { href: '/compare', label: 'Doppelgänger' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/how-it-works', label: 'How it works' },
   { href: '/ethics', label: 'Ethics' },
