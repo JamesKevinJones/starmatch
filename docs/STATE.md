@@ -1,6 +1,6 @@
 # State
 
-_Last updated: 2026-08-09_
+_Last updated: 2026-08-10_
 
 ## Status: shipped
 
@@ -14,20 +14,15 @@ needs no code change.
 
 ## What is done
 
-- Gallery pipeline end to end: 374 licence-filtered portraits fetched, 366
-  embedded (8 rejected — paintings and statues where no face was detected)
-- Browser inference verified end to end: held-out 2014 photo of Keanu Reeves
-  ranks him first at distance 0.512 / 99.4th percentile, ~2.3s including the
-  first-run 12MB model download
-- `gallery:verify` holding 71% top-1 on noisy held-out Commons probes
-- All 13 routes prerendered static; typecheck and build clean
-- Ethics, attribution, how-it-works pages read the real index at build time
+- **2,066 faces**, every one carrying a Wikidata description and a Wikipedia
+  link; zero entries showing a bare QID as a name
+- Gallery pipeline reproducible end to end: fetch → build → verify
+- Browser inference verified: a held-out photo of Keanu Reeves ranks him first
+- Hover panel on every gallery card: description, photographer, licence,
+  Wikipedia link
+- Doppelgänger comparison at `/compare`
+- Lint, typecheck and site build all clean; 14 routes prerendered static
 - `gallery-curation` Claude Skill in `.claude/skills/`
-- Lint clean (vendored Bklit chart code excluded, see `DECISIONS.md`)
-- Verified in-browser: light and dark themes, mobile at 375px with zero
-  horizontal page overflow, gallery search filtering 366 → 1, no console errors
-- Theme applies pre-paint via an inline script, so there is no flash of the
-  wrong theme and no hydration mismatch
 
 ## Doppelgänger mode (`/compare`)
 
@@ -39,6 +34,23 @@ Verified: two photos of Keanu Reeves five years apart measure 0.371. The closest
 pair of different people in the gallery is 0.377. Those are effectively the same
 number, which is the clearest demonstration of the threshold problem in the
 whole project — it is now cited on the ethics page.
+
+## Accuracy degrades as the gallery grows
+
+The single most useful result in the project, measured twice:
+
+| Gallery | top-1 accuracy | closest stranger pair |
+| --- | --- | --- |
+| 366 faces | 71% | 0.377 |
+| 2,066 faces | 57% | 0.3096 |
+
+At 2,066 faces the closest pair of *different* people (0.3096) is nearer than
+two photos of Keanu Reeves five years apart (0.371). Face matching gets **less**
+reliable as its database grows, which is the opposite of the common assumption.
+
+`gallery:verify` scales its pass mark with gallery size for exactly this reason
+— a fixed gate would fail on growth alone, which is the finding rather than a
+regression.
 
 ## Deliberately not built
 

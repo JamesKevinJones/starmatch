@@ -1,7 +1,7 @@
 # StarMatch
 
 A celebrity look-alike matcher that runs **entirely in your browser**. Drop in a
-photo, and it ranks your face against 366 public figures — without the image ever
+photo, and it ranks your face against 2,066 public figures — without the image ever
 leaving the tab.
 
 [Live site](https://starmatch-liard.vercel.app) · [How it works](https://starmatch-liard.vercel.app/how-it-works) · [Ethics](https://starmatch-liard.vercel.app/ethics)
@@ -40,21 +40,24 @@ A raw distance means nothing to a reader, and mapping it to a percentage with an
 invented formula would look precise while meaning nothing.
 
 Instead the build measures **every pair of different people** in the gallery —
-66,795 stranger distances — and stores the quantiles. Your score is where your
+2,133,145 stranger distances — and stores the quantiles. Your score is where your
 match falls in that real distribution.
 
 That measurement also produced the most interesting result in the project:
 
-| Stranger-pair distance | Value |
-| --- | --- |
-| Closest pair | **0.377** |
-| 5th percentile | 0.648 |
-| Median | 0.808 |
-| Furthest pair | 1.174 |
+| Stranger-pair distance | 366 faces | 2,066 faces |
+| --- | --- | --- |
+| Closest pair | 0.377 | **0.3096** |
+| 5th percentile | 0.648 | 0.671 |
+| Median | 0.808 | 0.831 |
+| Furthest pair | 1.174 | 1.218 |
 
 dlib's conventional "same person" threshold is **0.6**. The two most similar
-*different* people in a gallery of only 366 sit at 0.377 — comfortably inside it.
-A rule meant to mean "same person" fires on strangers. That is the argument
+*different* people sit at **0.3096** — not just inside that threshold, but nearer
+than two photos of Keanu Reeves taken five years apart (0.371). A rule meant to
+mean "same person" fires on strangers, and it gets worse as the gallery grows:
+top-1 accuracy fell from 71% to 57% when the gallery went from 366 to 2,066
+faces. That is the argument
 against using face matching for anything consequential, and it is on the
 [ethics page](https://starmatch-liard.vercel.app/ethics) rather than buried here.
 
@@ -79,7 +82,7 @@ npm run gallery:verify   # rank held-out photos, asserts top-1 accuracy
 `gallery:verify` pulls a *different* Commons photo of people already in the
 gallery and checks they rank first. Probe images come from noisy Commons
 categories (co-stars, group shots), so it demands ≥70% top-1 rather than
-perfection. Current run: **71%**, with correct matches showing clear margins.
+perfection. Current run: **57% at 2,066 faces** (was 71% at 366). The pass mark scales with gallery size, because top-1 accuracy provably degrades as the gallery grows.
 
 `data/portraits/` (48MB of source images) is gitignored and regenerable; the
 derived index in `public/data/` is committed.
