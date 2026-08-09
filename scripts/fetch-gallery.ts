@@ -34,24 +34,52 @@ const OCCUPATIONS: Array<{ qid: string; label: string }> = [
   { qid: 'wd:Q33999', label: 'actor' },
   { qid: 'wd:Q177220', label: 'singer' },
   { qid: 'wd:Q639669', label: 'musician' },
+  { qid: 'wd:Q2252262', label: 'rapper' },
   { qid: 'wd:Q2526255', label: 'film director' },
   { qid: 'wd:Q82955', label: 'politician' },
   { qid: 'wd:Q937857', label: 'footballer' },
   { qid: 'wd:Q3665646', label: 'basketball player' },
+  { qid: 'wd:Q10871364', label: 'boxer' },
+  { qid: 'wd:Q10833314', label: 'tennis player' },
+  { qid: 'wd:Q245068', label: 'comedian' },
+  { qid: 'wd:Q4610556', label: 'model' },
+  { qid: 'wd:Q947873', label: 'television presenter' },
+  { qid: 'wd:Q17125263', label: 'youtuber' },
+  { qid: 'wd:Q13590141', label: 'streamer' },
   { qid: 'wd:Q11774891', label: 'screenwriter' },
 ];
 
+/**
+ * Sitelink floor and per-occupation cap.
+ *
+ * The first pass used `> 110` with a cap of 160, which quietly excluded most
+ * living pop-culture figures: sitelink counts favour historical and political
+ * subjects, so the top 160 "actors" filled up with Shakespeare and Reagan
+ * before reaching anyone contemporary. Zendaya sits at 100 sitelinks and was
+ * cut by the floor; Dwayne Johnson at 112 cleared the floor but fell outside
+ * the cap. Both now qualify.
+ */
+const SITELINK_FLOOR = 45;
+const PER_OCCUPATION = 320;
+
 type WikidataRow = {
   person: { value: string };
-  personLabel: { value: string };
   image: { value: string };
   sitelinks: { value: string };
+  /** Filled in locally from the occupation we queried for. */
   occupationLabel?: { value: string };
 };
+
+/** Name, gloss and article URL, all from the entity API. */
+type Enriched = { label: string; description: string; wikipediaUrl: string };
 
 export type RawEntry = {
   id: string;
   name: string;
+  /** Short Wikidata gloss, e.g. "American actress and singer". May be empty. */
+  description: string;
+  /** English Wikipedia URL, if the person has an article. May be empty. */
+  wikipediaUrl: string;
   occupation: string;
   sitelinks: number;
   wikidataUrl: string;
@@ -63,16 +91,27 @@ export type RawEntry = {
   localFile: string;
 };
 
+/**
+ * Kept deliberately minimal.
+ *
+ * Adding an OPTIONAL join for the English Wikipedia article, on top of the
+ * lower sitelink floor, pushed this query past the WDQS timeout and it 504'd on
+ * every retry. Descriptions and Wikipedia URLs are cheap to fetch in bulk from
+ * the entity API instead (50 entities per call), so SPARQL only does what only
+ * SPARQL can: find people by occupation who have a portrait.
+ *
+ * The label service is not requested here either - it is the thing that
+ * silently returns bare QIDs. `enrichEntities` is the single source of names.
+ */
 const queryFor = (qid: string) => `
-SELECT ?person ?personLabel ?image ?sitelinks WHERE {
+SELECT ?person ?image ?sitelinks WHERE {
   ?person wdt:P106 ${qid} ;
           wdt:P18 ?image ;
           wikibase:sitelinks ?sitelinks .
-  FILTER(?sitelinks > 110)
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
+  FILTER(?sitelinks > ${SITELINK_FLOOR})
 }
 ORDER BY DESC(?sitelinks)
-LIMIT 160
+LIMIT ${PER_OCCUPATION}
 `;
 
 /** Strip the HTML Commons returns in its metadata fields. */
@@ -117,6 +156,63 @@ async function fetchOccupation(qid: string, label: string): Promise<WikidataRow[
     // Tag each row with the occupation we queried for, so the UI can show it.
     return json.results.bindings.map((r) => ({ ...r, occupationLabel: { value: label } }));
   });
+}
+
+/**
+ * Resolve entity IDs to English name, short description and Wikipedia URL.
+ *
+ * This replaces `SERVICE wikibase:label`, which silently returns the bare QID
+ * when it cannot resolve a label - that is how "Q873" ended up rendered as a
+ * person's name in the gallery, and why Meryl Streep could not be found by
+ * searching for her. The entity API returns the label, the gloss and the enwiki
+ * sitelink in one batched call, so all three come from the same authoritative
+ * source and a missing name is detectable rather than disguised as a QID.
+ */
+async function enrichEntities(ids: string[]) {
+  const out = new Map<string, Enriched>();
+
+  for (let i = 0; i < ids.length; i += 50) {
+    const batch = ids.slice(i, i + 50);
+    const params = new URLSearchParams({
+      action: 'wbgetentities',
+      ids: batch.join('|'),
+      props: 'labels|descriptions|sitelinks/urls',
+      languages: 'en',
+      sitefilter: 'enwiki',
+      format: 'json',
+    });
+    try {
+      const res = await withRetry('wbgetentities', async () => {
+        const r = await fetch(`https://www.wikidata.org/w/api.php?${params}`, {
+          headers: { 'User-Agent': UA },
+        });
+        if (!r.ok) throw new Error(`wbgetentities ${r.status}`);
+        return r;
+      });
+      const json = (await res.json()) as {
+        entities?: Record<string, {
+          labels?: { en?: { value: string } };
+          descriptions?: { en?: { value: string } };
+          sitelinks?: { enwiki?: { url?: string } };
+        }>;
+      };
+      for (const [qid, ent] of Object.entries(json.entities ?? {})) {
+        const label = ent.labels?.en?.value;
+        if (!label) continue;
+        out.set(qid, {
+          label,
+          description: ent.descriptions?.en?.value ?? '',
+          wikipediaUrl: ent.sitelinks?.enwiki?.url ?? '',
+        });
+      }
+    } catch {
+      /* leave unresolved; caller drops them */
+    }
+    console.log(`  enriched ${Math.min(i + 50, ids.length)}/${ids.length}`);
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
+  return out;
 }
 
 /** Commons allows 50 titles per call, so batch them. */
@@ -164,6 +260,10 @@ async function main() {
   const people = [...byPerson.values()];
   console.log(`  ${people.length} unique people`);
 
+  console.log('Resolving names, descriptions and Wikipedia links...');
+  const enriched = await enrichEntities(people.map((p) => p.person.value.split('/').pop()!));
+  console.log(`  ${enriched.size}/${people.length} resolved`);
+
   // Commons title is the last path segment of the P18 URL, percent-decoded.
   const titleFor = (r: WikidataRow) =>
     'File:' + decodeURIComponent(r.image.value.split('/').pop()!).replace(/_/g, ' ');
@@ -191,8 +291,19 @@ async function main() {
 
   const entries: RawEntry[] = [];
   let rejected = 0;
+  let unnameable = 0;
 
   for (const person of people) {
+    const id = person.person.value.split('/').pop()!;
+    const info = enriched.get(id);
+
+    // No resolvable English name means no entry. Better a smaller gallery than
+    // one that shows "Q873" where a person's name belongs.
+    if (!info || /^Q\d+$/.test(info.label)) {
+      unnameable++;
+      continue;
+    }
+
     const title = titleFor(person);
     const meta = metaByTitle.get(title);
     if (!meta) continue;
@@ -202,13 +313,14 @@ async function main() {
       continue;
     }
 
-    const id = person.person.value.split('/').pop()!;
     const ext = (meta.url.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z]/g, '') || 'jpg';
     const localFile = `${id}.${ext}`;
 
     entries.push({
       id,
-      name: person.personLabel.value,
+      name: info.label,
+      description: info.description,
+      wikipediaUrl: info.wikipediaUrl,
       occupation: person.occupationLabel?.value ?? 'public figure',
       sitelinks: Number(person.sitelinks.value),
       wikidataUrl: person.person.value,
@@ -221,7 +333,9 @@ async function main() {
     });
   }
 
-  console.log(`\n  ${entries.length} free-licensed, ${rejected} rejected on licence`);
+  console.log(
+    `\n  ${entries.length} free-licensed, ${rejected} rejected on licence, ${unnameable} unnameable`,
+  );
 
   // Download portraits at a capped width - we only need enough pixels for a
   // 150x150 face chip, and Commons originals are often 20MP.

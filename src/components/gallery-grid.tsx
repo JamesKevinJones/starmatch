@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Image from 'next/image';
-import { motion } from 'motion/react';
 import { Search } from 'lucide-react';
+import { GalleryCard } from './gallery-card';
 import type { GalleryEntry } from '@/lib/matcher';
 
 /** Searchable, filterable view of the whole index. */
@@ -15,6 +14,12 @@ export function GalleryGrid({ entries }: { entries: GalleryEntry[] }) {
     () => ['all', ...Array.from(new Set(entries.map((e) => e.occupation))).sort()],
     [entries],
   );
+
+  /**
+   * The hover detail panel is reserved for search results. Enabling it for the
+   * full grid would pop a panel every time the pointer crossed the page.
+   */
+  const searching = query.trim().length > 0;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -52,31 +57,12 @@ export function GalleryGrid({ entries }: { entries: GalleryEntry[] }) {
 
       <p className="label mt-4 opacity-60" role="status">
         Showing {shown.length} of {entries.length}
+        {searching && ' · hover a result for details'}
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {shown.map((e, i) => (
-          <motion.figure
-            key={e.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, delay: Math.min(i, 24) * 0.012 }}
-            className="brut-sm overflow-hidden"
-          >
-            <Image
-              src={e.thumb}
-              alt={e.name}
-              width={256}
-              height={256}
-              className="aspect-square w-full border-b-[3px] object-cover"
-            />
-            <figcaption className="p-2.5">
-              <p className="truncate font-display text-sm font-800" title={e.name}>{e.name}</p>
-              <p className="label mt-1 truncate opacity-55" title={e.artist}>
-                {e.licence}
-              </p>
-            </figcaption>
-          </motion.figure>
+          <GalleryCard key={e.id} entry={e} index={i} showDetail={searching} />
         ))}
       </div>
 

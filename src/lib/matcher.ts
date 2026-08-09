@@ -10,6 +10,10 @@
 export type GalleryEntry = {
   id: string;
   name: string;
+  /** Short Wikidata gloss, shown on hover in the gallery. May be empty. */
+  description: string;
+  /** English Wikipedia URL, linked from the hover card. May be empty. */
+  wikipediaUrl: string;
   occupation: string;
   thumb: string;
   licence: string;
