@@ -4,7 +4,7 @@ A celebrity look-alike matcher that runs **entirely in your browser**. Drop in a
 photo, and it ranks your face against 366 public figures — without the image ever
 leaving the tab.
 
-[Live site](https://starmatch.vercel.app) · [How it works](https://starmatch.vercel.app/how-it-works) · [Ethics](https://starmatch.vercel.app/ethics)
+[Live site](https://starmatch-liard.vercel.app) · [How it works](https://starmatch-liard.vercel.app/how-it-works) · [Ethics](https://starmatch-liard.vercel.app/ethics)
 
 ---
 
@@ -56,14 +56,14 @@ dlib's conventional "same person" threshold is **0.6**. The two most similar
 *different* people in a gallery of only 366 sit at 0.377 — comfortably inside it.
 A rule meant to mean "same person" fires on strangers. That is the argument
 against using face matching for anything consequential, and it is on the
-[ethics page](https://starmatch.vercel.app/ethics) rather than buried here.
+[ethics page](https://starmatch-liard.vercel.app/ethics) rather than buried here.
 
 ## Gallery provenance
 
 Portraits come from Wikimedia Commons via a Wikidata SPARQL query, and are
 **rejected unless their licence permits redistribution**. Photographer, licence
 and source URL are recorded for every image and published on the
-[attribution page](https://starmatch.vercel.app/attribution).
+[attribution page](https://starmatch-liard.vercel.app/attribution).
 
 The gallery inherits Wikipedia's well-documented skew toward men, the West, and
 the recent past. This is stated on the ethics page rather than smoothed over.

@@ -43,3 +43,5 @@ next-env.d.ts
 # Gallery build inputs: 48MB of source portraits, regenerable with
 # `npm run gallery:fetch`. The derived index in public/data IS committed.
 /data/portraits/
+
+.vercel

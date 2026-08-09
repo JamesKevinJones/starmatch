@@ -4,6 +4,7 @@ import './globals.css';
 import { SmoothScroll } from '@/components/smooth-scroll';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { SITE_URL as SITE } from '@/lib/site';
 
 const archivo = Archivo({
   subsets: ['latin'],
@@ -25,7 +26,6 @@ const plexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-const SITE = 'https://starmatch.vercel.app';
 const DESCRIPTION =
   'Upload a photo and find which public figure you most resemble. Face matching runs entirely in your browser — your photo is never uploaded, stored, or sent to a server.';
 
