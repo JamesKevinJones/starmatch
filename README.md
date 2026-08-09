@@ -56,8 +56,8 @@ dlib's conventional "same person" threshold is **0.6**. The two most similar
 *different* people sit at **0.3096** — not just inside that threshold, but nearer
 than two photos of Keanu Reeves taken five years apart (0.371). A rule meant to
 mean "same person" fires on strangers, and it gets worse as the gallery grows:
-top-1 accuracy fell from 71% to 57% when the gallery went from 366 to 2,066
-faces. That is the argument
+the closest stranger pair fell from 0.377 to 0.3096 when the gallery grew from
+366 to 2,066 faces. That is the argument
 against using face matching for anything consequential, and it is on the
 [ethics page](https://starmatch-liard.vercel.app/ethics) rather than buried here.
 
@@ -82,7 +82,14 @@ npm run gallery:verify   # rank held-out photos, asserts top-1 accuracy
 `gallery:verify` pulls a *different* Commons photo of people already in the
 gallery and checks they rank first. Probe images come from noisy Commons
 categories (co-stars, group shots), so it demands ≥70% top-1 rather than
-perfection. Current run: **57% at 2,066 faces** (was 71% at 366). The pass mark scales with gallery size, because top-1 accuracy provably degrades as the gallery grows.
+perfection. Current run: **80% top-1** at 2,066 faces.
+
+An earlier run reported 57%, which turned out to be the benchmark rather than
+the model: the probe set contained a Madame Tussauds waxwork of Morgan Freeman,
+a photo of a fan looking at a picture of Nicole Kidman, and a drag-racing shot
+matched to Taylor Swift on surname alone. Probes now require the person's full
+name, reject depictions rather than photographs, and skip any image with more
+than one face.
 
 `data/portraits/` (48MB of source images) is gitignored and regenerable; the
 derived index in `public/data/` is committed.

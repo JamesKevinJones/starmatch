@@ -24,7 +24,7 @@ Euclidean distance, which gives a usable dynamic range.
 Mapping distance to a percentage with a formula like `100 * (1 - d)` would look
 authoritative and mean nothing.
 
-The build computes all 66,795 stranger-pair distances and stores 101 quantiles.
+The build computes all 2,133,145 stranger-pair distances and stores 101 quantiles.
 The client interpolates against that table, so "closer than 99% of stranger
 pairs" is a claim that can be checked.
 
@@ -100,10 +100,46 @@ A single query with `?person wdt:P31 wd:Q5` plus a `VALUES` union over all
 occupations makes WDQS scan every human on Wikidata and reliably 504s. One query
 per occupation with a sitelink floor returns in ~40s each.
 
-## Verification demands 70%, not 100%
+## The 57% accuracy figure was the benchmark, not the model
+
+An earlier run reported 57% top-1 and it was tempting to read that as a size
+effect: 2,066 faces means more chances for a stranger to outrank the answer.
+Printing the probe filenames showed otherwise. The "failures" included:
+
+- `Morgan Freeman figure at Madame Tussauds` - a waxwork
+- `Fan looking at photograph of Nicole Kidman` - the detected face is the fan's
+- `Force-NHRA-Swift.jpg` - drag racing, matched to Taylor Swift on surname alone
+- `DiCaprioCrawfordSchwarzenegger...` - three people in frame
+
+A model that declines to match a wax dummy is behaving correctly. The probe
+filter now requires every part of the person's name, rejects depictions rather
+than photographs, and skips any image containing more than one face - there is
+no usable ground truth when we cannot tell which face is the subject.
+
+Same index, same model, clean probes: **80%**.
+
+## Flip augmentation was measured and rejected
+
+Horizontal-flip test-time augmentation is a standard cheap win, so it was worth
+trying. On this benchmark it moved top-1 accuracy by nothing at all - 8/10 with
+it, 8/10 without - in both the min-distance and averaged forms, while doubling
+inference cost.
+
+The min-distance form was quietly harmful: taking the closest of two views pulls
+*every* candidate nearer, impostors included, so Sidney Poitier moved into
+Morgan Freeman's top three and Naomi Campbell closed on Rihanna. It shrinks the
+margin rather than improving the ranking.
+
+Left behind `FLIP_TTA=1` so the result is reproducible instead of folklore.
+
+## Verification demands a floor, not perfection
 
 `gallery:verify` sources probe images from Commons categories, which contain
 co-stars, group shots and posters. An early run "passed" only because the probe
 was the same file used to build the index. The script now asserts the probe is
-not the indexed image, filters candidates by surname, and requires ≥70% top-1
-across multiple probes per subject.
+not the indexed image, requires the person's full name in the filename, and
+rejects multi-face and non-photographic probes.
+
+The gate sits at 60% rather than 80% because the clean probe set is small -
+around ten usable images, so one hard case is ten points. It is a floor against
+collapse, not a precision instrument.

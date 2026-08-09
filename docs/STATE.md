@@ -39,10 +39,14 @@ whole project — it is now cited on the ethics page.
 
 The single most useful result in the project, measured twice:
 
-| Gallery | top-1 accuracy | closest stranger pair |
-| --- | --- | --- |
-| 366 faces | 71% | 0.377 |
-| 2,066 faces | 57% | 0.3096 |
+| Gallery | closest stranger pair |
+| --- | --- |
+| 366 faces | 0.377 |
+| 2,066 faces | 0.3096 |
+
+Top-1 accuracy is **80%** at 2,066 faces on a cleaned probe set. The earlier
+57% figure was benchmark noise (waxworks, bystanders, surname collisions), not
+a size effect - see `DECISIONS.md`.
 
 At 2,066 faces the closest pair of *different* people (0.3096) is nearer than
 two photos of Keanu Reeves five years apart (0.371). Face matching gets **less**
