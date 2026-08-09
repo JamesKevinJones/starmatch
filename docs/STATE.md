@@ -1,0 +1,54 @@
+# State
+
+_Last updated: 2026-08-09_
+
+## Status: shipped
+
+- Repo: https://github.com/JamesKevinJones/starmatch (`main`)
+- Live: https://starmatch-liard.vercel.app
+
+`starmatch.vercel.app` is taken by another Vercel account, hence the `-liard`
+suffix. The canonical origin is derived from
+`NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, so attaching a custom domain later
+needs no code change.
+
+## What is done
+
+- Gallery pipeline end to end: 374 licence-filtered portraits fetched, 366
+  embedded (8 rejected — paintings and statues where no face was detected)
+- Browser inference verified end to end: held-out 2014 photo of Keanu Reeves
+  ranks him first at distance 0.512 / 99.4th percentile, ~2.3s including the
+  first-run 12MB model download
+- `gallery:verify` holding 71% top-1 on noisy held-out Commons probes
+- All 13 routes prerendered static; typecheck and build clean
+- Ethics, attribution, how-it-works pages read the real index at build time
+- `gallery-curation` Claude Skill in `.claude/skills/`
+
+## Outstanding — needs the user
+
+**Deleting the old fork.** `JamesKevinJones/face_recognition` is still live. The
+current `gh` token lacks the `delete_repo` scope and the refresh flow is
+interactive, so it could not be done from an automated session:
+
+```bash
+gh auth refresh -h github.com -s delete_repo
+gh repo delete JamesKevinJones/face_recognition --yes
+```
+
+This is irreversible. It was confirmed as intended; worth re-reading before
+running. The fork had zero commits of its own, so nothing original is lost.
+
+## Known limitations
+
+- Gallery skews male, Western and historical — inherited from Wikipedia
+  sitelink ranking. Documented on `/ethics` rather than corrected.
+- `verify` failures are two-person film stills where the detector picks the
+  co-star, not matcher errors.
+- `motion` is pinned to v12; v13's `AnimatePresence` freezes the matcher.
+
+## Sensible next steps
+
+- Lower the `sitelinks > 110` floor and add occupations to broaden the gallery,
+  which would also improve its demographic balance
+- Add a denylist in `fetch-gallery.ts` so takedowns survive a re-fetch
+- Attach a real custom domain
