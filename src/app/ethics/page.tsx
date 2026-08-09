@@ -49,9 +49,17 @@ export default async function EthicsPage() {
           For scale: two photographs of Keanu Reeves taken five years apart measure{' '}
           <strong>0.371</strong> apart in this same descriptor space — you can reproduce that on
           the <a href="/compare" className="underline underline-offset-4">doppelgänger page</a>.
-          The closest pair of <em>different</em> people in the gallery is{' '}
-          <strong>{cal.min.toFixed(3)}</strong>. Those numbers are effectively the same. Two
-          strangers can sit as close together as two photos of one person.
+          The closest pair of <em>different</em> people in this gallery is{' '}
+          <strong>{cal.min.toFixed(3)}</strong>.{' '}
+          {cal.min < 0.371
+            ? 'The strangers are closer together than the two photos of one man. There is no threshold that separates those cases, because they are the wrong way round.'
+            : 'Those numbers are effectively the same. Two strangers can sit as close together as two photos of one person.'}
+        </p>
+        <p>
+          That gap widened as the gallery grew. At 366 faces the closest stranger pair was 0.377;
+          at {gallery.entries.length} it is {cal.min.toFixed(3)}. More faces means more chances for
+          two of them to collide, so a system like this gets <em>less</em> reliable as its database
+          gets bigger — which is the opposite of how people assume it works.
         </p>
         <Stat rows={[
           ['Same person, 5 years apart', '0.371'],
