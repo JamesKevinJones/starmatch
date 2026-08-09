@@ -1,0 +1,263 @@
+@import "tailwindcss";
+/*
+  ---break---
+*/
+@custom-variant dark (&:is(.dark *));
+
+/*
+  StarMatch design language: neo-brutalism.
+
+  Hard 3px ink borders, hard offset shadows, no blur, no soft gradients on any
+  UI chrome. The only gradients on the site live inside the WebGL shader layer
+  behind the hero - keeping those two worlds separate is what stops the page
+  looking like every other AI-generated landing page.
+*/
+
+@theme {
+  /* Surfaces */
+  --color-paper: #f4f1ea;
+  --color-paper-dim: #e8e3d7;
+  --color-ink: #0b0b0b;
+  --color-ink-soft: #2e2c28;
+
+  /* Accents - high chroma, used flat and unblended */
+  --color-acid: #ddf247;
+  --color-volt: #4d5bff;
+  --color-coral: #ff5c4d;
+  --color-mint: #4ee6a8;
+  --color-orchid: #d78dff;
+
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* The brutalist offset shadow, at three weights */
+  --shadow-brut-sm: 3px 3px 0 0 var(--color-ink);
+  --shadow-brut: 6px 6px 0 0 var(--color-ink);
+  --shadow-brut-lg: 10px 10px 0 0 var(--color-ink);
+
+  --radius-brut: 2px;
+}
+
+@layer base {
+  :root {
+    --bg: var(--color-paper);
+    --fg: var(--color-ink);
+    --panel: #ffffff;
+    --line: var(--color-ink);
+  }
+
+  /*
+    Dark mode inverts the paper, but keeps the borders hard. Brutalism in the
+    dark means bright rules on near-black, not soft grey-on-grey.
+  */
+  :root[data-theme="dark"],
+  html.dark {
+    --bg: #121110;
+    --fg: #f4f1ea;
+    --panel: #1c1a18;
+    --line: #f4f1ea;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121110;
+      --fg: #f4f1ea;
+      --panel: #1c1a18;
+      --line: #f4f1ea;
+    }
+  }
+
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    /* Lenis drives scrolling; native smooth scroll would fight it. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
+  /* Visible, unmissable focus - brutalism has no excuse for poor a11y. */
+  :focus-visible {
+    outline: 3px solid var(--color-volt);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-acid);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* The single primitive the whole UI is built from. */
+  .brut {
+    border: 3px solid var(--line);
+    border-radius: var(--radius-brut);
+    background: var(--panel);
+    box-shadow: var(--shadow-brut);
+  }
+
+  .brut-sm {
+    border: 3px solid var(--line);
+    border-radius: var(--radius-brut);
+    background: var(--panel);
+    box-shadow: var(--shadow-brut-sm);
+  }
+
+  /* Press-down interaction: the shadow collapses into the element. */
+  .brut-press {
+    transition: transform 120ms cubic-bezier(0.2, 0, 0, 1),
+                box-shadow 120ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .brut-press:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 0 var(--line);
+  }
+
+  .brut-press:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--line);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* Diagonal hazard stripes, used on the ethics + limitations callouts. */
+  .hazard {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-ink) 0 10px,
+      var(--color-acid) 10px 20px
+    );
+  }
+}
+
+/*
+  Every animation on this site is opt-out. GSAP/Motion/anime timelines all check
+  this query too, but killing it at the CSS layer catches anything missed.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/*
+  ---break---
+*/
+/*
+  Bklit's chart tokens, retinted from its default greyscale to the StarMatch
+  accents so charts read as part of the same design language rather than a
+  bolted-on widget.
+*/
+:root {
+  --chart-1: #4d5bff;
+  --chart-2: #ff5c4d;
+  --chart-3: #4ee6a8;
+  --chart-4: #d78dff;
+  --chart-5: #b7c400;
+  --chart-background: transparent;
+  --chart-foreground: oklch(0.145 0.004 285);
+  --chart-foreground-muted: oklch(0.55 0.014 260);
+  --chart-line-primary: var(--chart-1);
+  --chart-line-secondary: var(--chart-2);
+  --chart-crosshair: oklch(0.4 0.1828 274.34);
+  --chart-grid: oklch(0.9 0 0);
+  --chart-brush-border: var(--chart-grid);
+  --chart-tooltip-background: oklch(0.21 0.006 285 / 0.8);
+  --chart-tooltip-foreground: oklch(0.985 0 0);
+  --chart-tooltip-muted: oklch(0.65 0.01 260);
+  --chart-marker-background: oklch(0.97 0.005 260);
+  --chart-marker-border: oklch(0.85 0.01 260);
+  --chart-marker-foreground: oklch(0.3 0.01 260);
+  --chart-label: oklch(0.45 0.01 260);
+  --chart-scale-01: oklch(0.98 0.003 106);
+  --chart-scale-02: oklch(0.92 0.008 106);
+  --chart-scale-03: oklch(0.82 0.015 106);
+  --chart-scale-04: oklch(0.68 0.02 106);
+  --chart-scale-05: oklch(0.55 0.025 106);
+  --chart-scale-pattern-color: oklch(0.96 0.005 106);
+}
+/*
+  ---break---
+*/
+.dark {
+  --chart-1: #8b95ff;
+  --chart-2: #ff8a7e;
+  --chart-3: #4ee6a8;
+  --chart-4: #d78dff;
+  --chart-5: #ddf247;
+  --chart-background: transparent;
+  --chart-foreground: oklch(0.45 0 0);
+  --chart-foreground-muted: oklch(0.65 0.01 260);
+  --chart-crosshair: oklch(0.45 0 0);
+  --chart-grid: oklch(0.25 0 0);
+  --chart-brush-border: var(--chart-grid);
+  --chart-marker-background: oklch(0.25 0.01 260);
+  --chart-marker-border: oklch(0.4 0.01 260);
+  --chart-marker-foreground: oklch(0.9 0 0);
+  --chart-label: oklch(0.75 0.01 260);
+  --chart-scale-01: oklch(0.28 0.03 270);
+  --chart-scale-02: oklch(0.38 0.04 270);
+  --chart-scale-03: oklch(0.48 0.05 270);
+  --chart-scale-04: oklch(0.58 0.06 270);
+  --chart-scale-05: oklch(0.68 0.07 270);
+  --chart-scale-pattern-color: oklch(0.145 0 0);
+}
+/*
+  ---break---
+*/
+@theme inline {
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-background: var(--chart-background);
+  --color-chart-foreground: var(--chart-foreground);
+  --color-chart-foreground-muted: var(--chart-foreground-muted);
+  --chart-line-primary: var(--chart-line-primary);
+  --chart-line-secondary: var(--chart-line-secondary);
+  --color-chart-crosshair: var(--chart-crosshair);
+  --color-chart-grid: var(--chart-grid);
+  --chart-brush-border: var(--chart-brush-border);
+  --color-chart-tooltip-background: var(--chart-tooltip-background);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+  --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+  --color-chart-marker-background: var(--chart-marker-background);
+  --color-chart-marker-border: var(--chart-marker-border);
+  --color-chart-marker-foreground: var(--chart-marker-foreground);
+  --color-chart-label: var(--chart-label);
+  --color-chart-scale-01: var(--chart-scale-01);
+  --color-chart-scale-02: var(--chart-scale-02);
+  --color-chart-scale-03: var(--chart-scale-03);
+  --color-chart-scale-04: var(--chart-scale-04);
+  --color-chart-scale-05: var(--chart-scale-05);
+  --color-chart-scale-pattern-color: var(--chart-scale-pattern-color);
+}
