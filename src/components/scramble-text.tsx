@@ -26,7 +26,6 @@ export function ScrambleText({
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    let raf = 0;
     let interval = 0;
 
     const start = window.setTimeout(() => {
@@ -55,7 +54,6 @@ export function ScrambleText({
     return () => {
       window.clearTimeout(start);
       window.clearInterval(interval);
-      cancelAnimationFrame(raf);
     };
   }, [text, delay, speed]);
 

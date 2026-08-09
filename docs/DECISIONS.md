@@ -44,6 +44,23 @@ Even on v12, `mode="wait"` requires a single child. The original code passed fiv
 conditional expressions (four evaluating to `false`); the current view is now
 selected in a `switch` and rendered as one keyed node.
 
+## Theme lives in the DOM, not in React state
+
+A `useState` + `useEffect` theme toggle renders the wrong theme for a frame on
+every load, and trips `react-hooks/set-state-in-effect`.
+
+An inline script in `<head>` now applies the stored/preferred theme before first
+paint, the button mutates `data-theme` and `.dark` directly, and CSS swaps the
+icon. No state, no flash. `<html>` carries `suppressHydrationWarning` because
+the script deliberately makes client markup differ from the server's.
+
+## Vendored chart code is excluded from lint
+
+`src/components/charts/**` came from the Bklit shadcn registry. Linting it would
+mean either rewriting 58 third-party files or burying them in inline disables,
+and both turn the next registry update into a merge conflict. Our own chart
+code — `distance-chart.tsx` and `calibration-chart.tsx` — is linted normally.
+
 ## Charts use visx directly, not Bklit's `<LineChart>`
 
 Bklit UI was installed from its shadcn registry and its chart tokens are used

@@ -137,6 +137,18 @@
     box-shadow: 1px 1px 0 0 var(--line);
   }
 
+  /*
+    Theme-toggle icons. Both are in the DOM; CSS picks one from the root's
+    theme so the button needs no React state and cannot flash the wrong glyph.
+  */
+  .theme-icon-sun { display: none; }
+  .theme-icon-moon { display: block; }
+
+  :root[data-theme="dark"] .theme-icon-sun,
+  :root.dark .theme-icon-sun { display: block; }
+  :root[data-theme="dark"] .theme-icon-moon,
+  :root.dark .theme-icon-moon { display: none; }
+
   .label {
     font-family: var(--font-mono);
     font-size: 0.6875rem;

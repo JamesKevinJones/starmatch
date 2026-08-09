@@ -95,11 +95,27 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${space.variable} ${plexMono.variable}`}>
+    <html
+      lang="en"
+      // Required, not incidental: the theme script below writes data-theme and
+      // .dark onto <html> before React hydrates, so the client markup
+      // deliberately differs from the server's. Scoped to this element only.
+      suppressHydrationWarning
+      className={`${archivo.variable} ${space.variable} ${plexMono.variable}`}
+    >
       <body>
+        {/*
+          Applies the stored/preferred theme before first paint. Doing this in an
+          effect instead would render the wrong theme for a frame on every load.
+          Sets `data-theme` (site tokens) and `.dark` (Bklit chart tokens).
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('starmatch-theme');var d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;var r=document.documentElement;r.dataset.theme=d?'dark':'light';r.classList.toggle('dark',d)}catch(e){}})()`,
+          }}
+        />
         <script
           type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <a

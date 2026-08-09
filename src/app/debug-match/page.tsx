@@ -12,13 +12,12 @@ import { matchFace } from '@/lib/matcher';
  * sitemap and noindexed; it renders nothing in production builds.
  */
 export default function DebugMatch() {
-  const [out, setOut] = useState('running…');
+  // Decided at render, not in an effect - it never changes at runtime.
+  const enabled = process.env.NODE_ENV !== 'production';
+  const [out, setOut] = useState(enabled ? 'running…' : 'disabled in production');
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production') {
-      setOut('disabled in production');
-      return;
-    }
+    if (!enabled) return;
     const url = new URLSearchParams(window.location.search).get('src') ?? '/test/probe-keanu-2014.jpg';
 
     (async () => {
@@ -55,7 +54,7 @@ export default function DebugMatch() {
         setOut(JSON.stringify({ ok: false, error: (e as Error).message }, null, 2));
       }
     })();
-  }, []);
+  }, [enabled]);
 
   return (
     <pre id="debug-output" className="p-6 font-mono text-xs whitespace-pre-wrap">

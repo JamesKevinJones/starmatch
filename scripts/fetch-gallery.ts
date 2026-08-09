@@ -9,7 +9,7 @@
  *
  * Output: data/gallery-raw.json + data/portraits/*.jpg
  */
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 

@@ -23,6 +23,11 @@ needs no code change.
 - All 13 routes prerendered static; typecheck and build clean
 - Ethics, attribution, how-it-works pages read the real index at build time
 - `gallery-curation` Claude Skill in `.claude/skills/`
+- Lint clean (vendored Bklit chart code excluded, see `DECISIONS.md`)
+- Verified in-browser: light and dark themes, mobile at 375px with zero
+  horizontal page overflow, gallery search filtering 366 → 1, no console errors
+- Theme applies pre-paint via an inline script, so there is no flash of the
+  wrong theme and no hydration mismatch
 
 ## Outstanding — needs the user
 

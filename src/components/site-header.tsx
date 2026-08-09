@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 
 const NAV = [
@@ -14,31 +13,24 @@ const NAV = [
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const [dark, setDark] = useState(false);
 
   /**
-   * The site's own tokens key off `data-theme`, but the Bklit chart tokens that
-   * came from the shadcn registry key off a `.dark` class. Set both so the
-   * charts never end up in a different theme to the page around them.
+   * The theme lives in the DOM, not in React state.
+   *
+   * An inline script in the document head applies it before first paint, so
+   * there is no flash of the wrong theme. Mirroring it into state here would
+   * only reintroduce that flash (state starts wrong, corrects after hydration)
+   * and force a setState inside an effect. The button toggles the attributes
+   * directly and CSS swaps the icon.
+   *
+   * Both `data-theme` and `.dark` are set: the site's tokens key off the former,
+   * the Bklit chart tokens from the shadcn registry key off the latter.
    */
-  const applyTheme = (isDark: boolean) => {
-    const root = document.documentElement;
-    root.dataset.theme = isDark ? 'dark' : 'light';
-    root.classList.toggle('dark', isDark);
-  };
-
-  useEffect(() => {
-    const stored = localStorage.getItem('starmatch-theme');
-    const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = stored ? stored === 'dark' : prefers;
-    setDark(isDark);
-    applyTheme(isDark);
-  }, []);
-
   const toggle = () => {
-    const next = !dark;
-    setDark(next);
-    applyTheme(next);
+    const root = document.documentElement;
+    const next = root.dataset.theme !== 'dark';
+    root.dataset.theme = next ? 'dark' : 'light';
+    root.classList.toggle('dark', next);
     localStorage.setItem('starmatch-theme', next ? 'dark' : 'light');
   };
 
@@ -72,13 +64,15 @@ export function SiteHeader() {
           })}
         </nav>
 
+        {/* Icons swap via CSS on the root's data-theme, so no state is needed. */}
         <button
           type="button"
           onClick={toggle}
-          aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+          aria-label="Toggle light and dark theme"
           className="ml-auto md:ml-0 brut-sm brut-press p-2"
         >
-          {dark ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
+          <Moon size={18} aria-hidden className="theme-icon-moon" />
+          <Sun size={18} aria-hidden className="theme-icon-sun" />
         </button>
 
         <Link href="/match" className="brut-sm brut-press bg-coral px-4 py-2 label text-white hidden sm:block">
