@@ -62,6 +62,12 @@ const OCCUPATIONS: Array<{ qid: string; label: string }> = [
 const SITELINK_FLOOR = 45;
 const PER_OCCUPATION = 320;
 
+/**
+ * Parallel portrait downloads. Deliberately modest: Wikimedia runs on donated
+ * infrastructure and thumb.php renders each thumbnail on demand.
+ */
+const DOWNLOAD_CONCURRENCY = 5;
+
 type WikidataRow = {
   person: { value: string };
   image: { value: string };
@@ -339,27 +345,42 @@ async function main() {
 
   // Download portraits at a capped width - we only need enough pixels for a
   // 150x150 face chip, and Commons originals are often 20MP.
-  let downloaded = 0;
-  for (const e of entries) {
-    const dest = path.join(PORTRAIT_DIR, e.localFile);
-    if (existsSync(dest)) {
-      downloaded++;
-      continue;
+  //
+  // Fetched through a small worker pool. Strictly sequential downloads measured
+  // 34 files/minute, because thumb.php has to render each thumbnail server-side
+  // and the round trip dominates; that made a 2,000-portrait rebuild a 40-minute
+  // wait. DOWNLOAD_CONCURRENCY is kept low deliberately - this is someone
+  // else's donated infrastructure, not a resource to saturate.
+  const pending = entries.filter((e) => !existsSync(path.join(PORTRAIT_DIR, e.localFile)));
+  let downloaded = entries.length - pending.length;
+  const cached = downloaded;
+  console.log(`  ${cached} already cached, ${pending.length} to fetch`);
+
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < pending.length) {
+      const e = pending[cursor++];
+      const dest = path.join(PORTRAIT_DIR, e.localFile);
+      const thumb = `https://commons.wikimedia.org/w/thumb.php?f=${encodeURIComponent(
+        e.commonsFile.replace(/^File:/, ''),
+      )}&w=640`;
+      try {
+        const res = await fetch(thumb, { headers: { 'User-Agent': UA } });
+        if (res.ok) {
+          await writeFile(dest, Buffer.from(await res.arrayBuffer()));
+          downloaded++;
+          if (downloaded % 50 === 0) {
+            console.log(`  downloaded ${downloaded}/${entries.length}`);
+          }
+        }
+      } catch {
+        /* skip unreachable images; build-index will drop them */
+      }
+      await new Promise((r) => setTimeout(r, 60));
     }
-    const thumb = `https://commons.wikimedia.org/w/thumb.php?f=${encodeURIComponent(
-      e.commonsFile.replace(/^File:/, ''),
-    )}&w=640`;
-    try {
-      const res = await fetch(thumb, { headers: { 'User-Agent': UA } });
-      if (!res.ok) continue;
-      await writeFile(dest, Buffer.from(await res.arrayBuffer()));
-      downloaded++;
-      if (downloaded % 25 === 0) console.log(`  downloaded ${downloaded}/${entries.length}`);
-    } catch {
-      /* skip unreachable images; build-index will drop them */
-    }
-    await new Promise((r) => setTimeout(r, 60));
-  }
+  };
+
+  await Promise.all(Array.from({ length: DOWNLOAD_CONCURRENCY }, worker));
 
   await writeFile(path.join(OUT_DIR, 'gallery-raw.json'), JSON.stringify(entries, null, 2));
   console.log(`\nDone. ${downloaded} portraits in data/portraits, manifest at data/gallery-raw.json`);
