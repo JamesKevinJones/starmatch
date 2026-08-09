@@ -15,11 +15,6 @@ export function GalleryGrid({ entries }: { entries: GalleryEntry[] }) {
     [entries],
   );
 
-  /**
-   * The hover detail panel is reserved for search results. Enabling it for the
-   * full grid would pop a panel every time the pointer crossed the page.
-   */
-  const searching = query.trim().length > 0;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -59,12 +54,12 @@ export function GalleryGrid({ entries }: { entries: GalleryEntry[] }) {
 
       <p className="label mt-4 opacity-60" role="status">
         Showing {shown.length} of {entries.length}
-        {searching && ' · hover a result for details'}
+        {' · hover any face for details'}
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {shown.map((e, i) => (
-          <GalleryCard key={e.id} entry={e} index={i} showDetail={searching} />
+          <GalleryCard key={e.id} entry={e} index={i} />
         ))}
       </div>
 

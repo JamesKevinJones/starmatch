@@ -9,22 +9,16 @@ import type { GalleryEntry } from '@/lib/matcher';
 /**
  * A single gallery face.
  *
- * When `showDetail` is set the card reveals a summary panel on hover or focus,
- * with a link out to Wikipedia. That only happens for search results: showing
- * it across all 300+ cards would fire a panel every time the pointer crossed
- * the grid, which is noise rather than information.
+ * Reveals a summary panel with a Wikipedia link on hover or keyboard focus.
+ *
+ * This was originally gated behind an active search, on the theory that a panel
+ * on every card would be noise. In practice it just made the feature
+ * undiscoverable - hovering a face did nothing and looked broken - so it now
+ * applies to every card. Only the hovered card opens, so there is no noise to
+ * speak of.
  */
-export function GalleryCard({
-  entry,
-  index,
-  showDetail,
-}: {
-  entry: GalleryEntry;
-  index: number;
-  showDetail: boolean;
-}) {
+export function GalleryCard({ entry, index }: { entry: GalleryEntry; index: number }) {
   const [open, setOpen] = useState(false);
-  const active = showDetail && open;
 
   return (
     <motion.figure
@@ -37,7 +31,7 @@ export function GalleryCard({
       // Keyboard and touch users get the same panel; hover alone would exclude them.
       onFocus={() => setOpen(true)}
       onBlur={() => setOpen(false)}
-      tabIndex={showDetail ? 0 : -1}
+      tabIndex={0}
     >
       <div className="overflow-hidden">
         <Image
@@ -70,7 +64,7 @@ export function GalleryCard({
       </figcaption>
 
       <AnimatePresence>
-        {active && (
+        {open && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
