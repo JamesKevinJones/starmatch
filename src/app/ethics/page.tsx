@@ -70,8 +70,11 @@ export default async function EthicsPage() {
           West, and toward the recent past.
         </p>
         <p>
-          The current composition by occupation is below. There is no correction applied for
-          gender, ethnicity, or era — the bias is stated rather than quietly smoothed over.
+          The breakdown below is by the occupation each person was <em>queried</em> under, not
+          what they are best known for: anyone with a single acting credit lands in
+          &ldquo;actor&rdquo; because that query runs first. It is a fair picture of how the
+          gallery was assembled, not a biography. No correction is applied for gender, ethnicity
+          or era — the bias is stated rather than quietly smoothed over.
         </p>
         <Stat rows={occupations.map(([k, v]) => [k, String(v)])} />
       </Section>

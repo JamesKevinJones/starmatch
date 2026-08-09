@@ -46,11 +46,13 @@ export function GalleryGrid({ entries }: { entries: GalleryEntry[] }) {
         <select
           value={occupation}
           onChange={(e) => setOccupation(e.target.value)}
-          aria-label="Filter by occupation"
+          aria-label="Filter by search category"
           className="brut-sm bg-[var(--panel)] px-4 py-2.5 capitalize"
         >
           {occupations.map((o) => (
-            <option key={o} value={o}>{o}</option>
+            <option key={o} value={o}>
+              {o === 'all' ? 'All categories' : o}
+            </option>
           ))}
         </select>
       </div>

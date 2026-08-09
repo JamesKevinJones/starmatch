@@ -53,9 +53,20 @@ export function GalleryCard({
         <p className="truncate font-display text-sm font-800" title={entry.name}>
           {entry.name}
         </p>
-        <p className="label mt-1 truncate opacity-55" title={entry.artist}>
-          {entry.licence}
-        </p>
+        {/*
+          The Wikidata gloss, not the licence and not `occupation`.
+
+          `occupation` records which query found the person, not what they are
+          known for - everyone with any acting credit lands in the "actor"
+          bucket because that query runs first, which rendered "Donald Trump /
+          actor." Licence and photographer still appear on the hover panel and
+          in full on /attribution.
+        */}
+        {entry.description && (
+          <p className="mt-1 line-clamp-2 text-xs leading-snug opacity-65" title={entry.description}>
+            {entry.description}
+          </p>
+        )}
       </figcaption>
 
       <AnimatePresence>
@@ -70,11 +81,14 @@ export function GalleryCard({
           >
             <p className="font-display text-base font-800 leading-tight">{entry.name}</p>
 
-            <p className="mt-1.5 text-sm leading-snug opacity-85">
-              {entry.description || `${entry.occupation}.`}
-            </p>
+            {/* No occupation fallback: a wrong claim is worse than no claim. */}
+            {entry.description && (
+              <p className="mt-1.5 text-sm leading-snug opacity-85">{entry.description}</p>
+            )}
 
-            <p className="label mt-2 opacity-55">Photo: {entry.artist}</p>
+            <p className="label mt-2 opacity-55">
+              Photo: {entry.artist} · {entry.licence}
+            </p>
 
             {entry.wikipediaUrl ? (
               <a

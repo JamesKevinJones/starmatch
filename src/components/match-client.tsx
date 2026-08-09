@@ -216,7 +216,10 @@ function Results({
 
           <p className="label mt-6 opacity-60">You most resemble</p>
           <p className="font-display text-4xl font-900 leading-tight">{top.entry.name}</p>
-          <p className="mt-1 text-sm capitalize opacity-70">{top.entry.occupation}</p>
+          {/* Wikidata's gloss, not `occupation` — see gallery-card.tsx. */}
+          {top.entry.description && (
+            <p className="mt-1 text-sm opacity-70">{top.entry.description}</p>
+          )}
 
           <p className="brut-sm mt-5 inline-block bg-volt px-3 py-1.5 text-sm font-600 text-white">
             {verdict}
