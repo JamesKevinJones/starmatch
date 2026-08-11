@@ -49,3 +49,8 @@ draw). All honour `prefers-reduced-motion`.
 
 See `docs/VERIFY.md`. The command that actually matters is
 `npm run gallery:verify` — it must hold ≥70% top-1 on held-out photos.
+
+## Frontend
+
+See `docs/FRONTEND.md` for frontend engineering rules.
+
