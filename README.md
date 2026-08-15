@@ -29,10 +29,11 @@ floats — running in WebGL via TensorFlow.js.
 
 ```
 photo → detect (SSD-MobileNet) → 68 landmarks → align
-      → embed (ResNet-34, 128-d) → Euclidean rank vs 366 gallery vectors
+      → embed (ResNet-34, 128-d) → Euclidean rank vs 2,066 gallery vectors
 ```
 
-The whole gallery is a 183KB `Float32Array` plus a JSON manifest.
+The whole gallery is a 1.0 MB `Float32Array` plus a JSON manifest —
+2,066 × 128 × 4 bytes, downloaded once and ranked in memory.
 
 ## Honest scoring
 
@@ -122,6 +123,12 @@ without scripting a file picker.
 
 Each animation library owns exactly one layer so none of them fight over the same
 property. See [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+## Elsewhere
+
+Part of [my portfolio](https://portfolio-website-eight-kappa-iwtiz3w2ef.vercel.app),
+which introduces each project by the thing it refuses to do. This one refuses to
+upload your photo — there is no endpoint to upload it to.
 
 ## Licence
 
