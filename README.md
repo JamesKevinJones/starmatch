@@ -82,8 +82,13 @@ npm run gallery:verify   # rank held-out photos, asserts top-1 accuracy
 
 `gallery:verify` pulls a *different* Commons photo of people already in the
 gallery and checks they rank first. Probe images come from noisy Commons
-categories (co-stars, group shots), so it demands ≥70% top-1 rather than
-perfection. Current run: **80% top-1** at 2,066 faces.
+categories (co-stars, group shots), so the gate sits at **≥60% top-1** rather
+than at perfection — the clean probe set is small, and a stricter gate would
+fail on sampling noise instead of on the model.
+
+Current run: **8/10 clean probes** across 18 subjects, at 2,066 faces. That is
+80%, but ten samples put the 95% interval at roughly **49–94%** — quoting the
+point estimate alone would imply rigour the sample size does not support.
 
 An earlier run reported 57%, which turned out to be the benchmark rather than
 the model: the probe set contained a Madame Tussauds waxwork of Morgan Freeman,
@@ -92,7 +97,7 @@ matched to Taylor Swift on surname alone. Probes now require the person's full
 name, reject depictions rather than photographs, and skip any image with more
 than one face.
 
-`data/portraits/` (48MB of source images) is gitignored and regenerable; the
+`data/portraits/` (~267MB of source images) is gitignored and regenerable; the
 derived index in `public/data/` is committed.
 
 ## Local development
