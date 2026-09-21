@@ -45,3 +45,6 @@ next-env.d.ts
 /data/portraits/
 
 .vercel
+
+# Brag video renders and Hyperframes composition (regenerable with /brag)
+/brag-output/
