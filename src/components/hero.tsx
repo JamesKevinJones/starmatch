@@ -96,7 +96,10 @@ export function Hero({ galleryCount }: { galleryCount: number }) {
             ['128', 'dimensions'],
             [String(galleryCount), 'public figures'],
             ['0', 'photos uploaded'],
-            ['183 KB', 'index size'],
+            // 128 floats x 4 bytes per face. Was a hardcoded "183 KB" from the
+            // 366-face era, which stayed wrong on the live hero after the
+            // gallery grew to 2,000+.
+            [`${((galleryCount * 128 * 4) / 1024 / 1024).toFixed(1)} MB`, 'index size'],
           ].map(([value, label]) => (
             <div key={label} className="brut-sm px-4 py-3">
               <dt className="font-display text-2xl font-900">{value}</dt>
