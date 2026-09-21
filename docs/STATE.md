@@ -1,6 +1,6 @@
 # State
 
-_Last updated: 2026-08-10_
+_Last updated: 2026-09-21_
 
 ## Status: shipped
 
@@ -23,6 +23,16 @@ needs no code change.
 - Doppelgänger comparison at `/compare`
 - Lint, typecheck and site build all clean; 14 routes prerendered static
 - `gallery-curation` Claude Skill in `.claude/skills/`
+
+## Brag video
+
+`/brag` produced `brag-output/brag.mp4` (21s, 1080p, music + SFX) with a baked
+poster frame and `share-copy.txt`. The folder is gitignored; regenerate with
+`/brag`, or rebuild the composition with `python brag-output/composition/build.py`
+then `npx hyperframes render` inside `brag-output/composition/`.
+
+Fixed on the way: the hero hardcoded "183 KB index size" from the 366-face era;
+it is now computed from the gallery count (1.0 MB live).
 
 ## Doppelgänger mode (`/compare`)
 
