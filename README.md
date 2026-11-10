@@ -134,7 +134,10 @@ An early gallery check counted misleading Commons images, including waxworks
 and people in film stills. That made the reported accuracy swing with the probe
 set. The verification script now filters depictions, checks names and rejects
 multi-face images. The remaining small sample still limits what the percentage
-can prove.
+can prove. A fresh install also surfaced vulnerable dependencies; this branch
+updates Next.js and two transitive packages. A production dependency audit
+reported zero advisories on 10 November 2026; development dependencies still
+have advisories to triage separately.
 
 ## Stack
 

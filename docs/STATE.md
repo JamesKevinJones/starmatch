@@ -6,9 +6,13 @@ _Last updated: 2026-11-10_
 
 - Branch `polish/proof` adds six deterministic matcher scoring tests, Node CI,
   an MIT licence, an environment example and a real local homepage capture.
-- Local `npm test`, `npm run lint` and `npm run typecheck` passed. The local
-  production build hit Google Fonts network errors, then a Windows Turbopack
-  worker error; check the Ubuntu CI build before merging.
+- Local `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`
+  passed after updating Next.js to 16.4.6. The first build attempts on 16.3.0
+  hit Google Fonts network errors and a Windows Turbopack worker error.
+- A fresh install exposed a direct critical Next.js advisory. Next.js and its
+  ESLint config now use 16.4.6; source-map-js and proxy-addr were updated in
+  the lockfile. `npm audit --omit=dev` reported zero advisories. The full
+  audit still reports 24 development dependency advisories.
 - Gallery accuracy and browser face inference were not remeasured in this pass.
 - Next: confirm CI and review the PR; keep the historical 8/10 probe result
   labelled as a previous run until a fresh gallery verification is performed.
