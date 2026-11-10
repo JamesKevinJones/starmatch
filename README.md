@@ -1,10 +1,16 @@
 # StarMatch
 
+[![CI](https://github.com/JamesKevinJones/starmatch/actions/workflows/ci.yml/badge.svg)](https://github.com/JamesKevinJones/starmatch/actions/workflows/ci.yml) [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
+
 A celebrity look-alike matcher that runs **entirely in your browser**. Drop in a
 photo, and it ranks your face against 2,066 public figures — without the image ever
 leaving the tab.
 
 [Live site](https://starmatch-liard.vercel.app) · [How it works](https://starmatch-liard.vercel.app/how-it-works) · [Ethics](https://starmatch-liard.vercel.app/ethics)
+
+![StarMatch home page, captured from the local app at 1280 by 800](docs/img/starmatch-home.png)
+
+_Local Next.js page captured on 10 November 2026 from commit `23b0502a97f8`, with reduced motion enabled._
 
 ---
 
@@ -103,13 +109,35 @@ derived index in `public/data/` is committed.
 ## Local development
 
 ```bash
-npm install
+npm ci
+npm test
 npm run dev
 ```
 
 `/debug-match` is a dev-only harness that runs the real browser pipeline against
 a held-out fixture and prints the ranking as JSON — used to assert inference
 without scripting a file picker.
+
+## Tests and CI
+
+`npm test` checks Euclidean distance, the empirical percentile boundaries and
+interpolation, and the resemblance verdict thresholds without loading a face
+model or making network calls. On 10 November 2026, all six tests passed from
+commit `23b0502a97f8` plus this PR's test additions. CI also runs lint,
+typecheck and a production build on pushes and pull requests. Run
+`npm run gallery:verify` separately to measure held-out gallery accuracy; it
+downloads Commons images and is deliberately outside the deterministic CI job.
+
+## What broke and what I learned
+
+An early gallery check counted misleading Commons images, including waxworks
+and people in film stills. That made the reported accuracy swing with the probe
+set. The verification script now filters depictions, checks names and rejects
+multi-face images. The remaining small sample still limits what the percentage
+can prove. A fresh install also surfaced vulnerable dependencies; this branch
+updates Next.js and two transitive packages. A production dependency audit
+reported zero advisories on 10 November 2026; development dependencies still
+have advisories to triage separately.
 
 ## Stack
 
@@ -137,5 +165,5 @@ upload your photo — there is no endpoint to upload it to.
 
 ## Licence
 
-MIT. Portraits remain © their photographers under the licences listed on the
+The code is [MIT licensed](LICENSE). Portraits remain © their photographers under the licences listed on the
 attribution page.
